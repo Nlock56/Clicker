@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Кликер тест</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+         /*   background: linear-gradient(to bottom, red, yellow); /* Градиент от красного к желтому */
+        }
+        #clickButton {
+            padding: 20px;
+            font-size: 20px;
+            background-color: #ffcc00;
+            border: 2px solid rgba(0, 0, 0, 0.459); /* Черная обводка */
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #score, #shop, #gems {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        #upgradeButton, #multiplierButton, #rebirthButton {
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 20px;
+            background-color: #66cc66;
+            border: 2px solid rgba(0, 0, 0, 0.459); /* Черная обводка */
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #multiplierInfo, #rebirthInfo, #rewardInfo {
+            margin-top: 10px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #rewardInfo {
+            margin-left: 20px; /* Отступ слева для наград */
+            font-size: 18px;
+            color: #000080; /* Темно-синий цвет текста */
+        }
+    </style>
+</head>
+<body>
+
+<h1>Кликни на кнопку!</h1>
+<div class="container">
+    <button id="clickButton">Кликни здесь!</button>
+    <div id="rewardInfo">Награды будут показаны здесь.</div>
+</div>
+
+<div id="score">Твои очки: 0</div>
+<div id="gems">Гемы: 0</div>
+<div id="upgradeInfo">Цена улучшения: 10</div>
+<button id="upgradeButton">Купить улучшение</button>
+
+<h2>Магазин множителей</h2>
+<div id="shop">
+    <div id="multiplierInfo">Цена множителя: 20, Множитель: 1</div>
+    <button id="multiplierButton">Купить множитель</button>
+</div>
+
+<h2>Перерождение</h2>
+<div id="rebirthInfo">Перерождения: 0</div>
+<div id="rebirthCostInfo">Цена перерождения: 100 кликов</div>
+<button id="rebirthButton">Перерождение</button>
+
+<script>
+    let score = 0;
+    let gems = 0;
+    let rebirths = 0;
+    let clicksPerClick = 1;
+    let multiplier = 1;
+    let timeSpent = 0; // Время в игре (временем будет выражено в секундах)
+    const clickButton = document.getElementById('clickButton');
+    const scoreDisplay = document.getElementById('score');
+    const gemsDisplay = document.getElementById('gems');
+    const upgradeButton = document.getElementById('upgradeButton');
+    const upgradeInfo = document.getElementById('upgradeInfo');
+    const multiplierButton = document.getElementById('multiplierButton');
+    const multiplierInfo = document.getElementById('multiplierInfo');
+    const rebirthButton = document.getElementById('rebirthButton');
+    const rebirthInfo = document.getElementById('rebirthInfo');
+    const rebirthCostInfo = document.getElementById('rebirthCostInfo');
+    const rewardInfo = document.getElementById('rewardInfo');
+    
+    let upgradeCost = 10; // Начальная цена улучшения
+    let multiplierCost = 20; // Начальная цена множителя
+    let rebirthCost = 100; // Начальная стоимость перерождения
+
+    // Награды за достижение определенного времени
+    const timeRewards = [
+        { time: 300, reward: 100 }, // 5 минут
+        { time: 600, reward: 500 }, // 10 минут
+        { time: 900, reward: 1000 }, // 15 минут
+    ];
+
+    clickButton.addEventListener('click', () => {
+        score += clicksPerClick * multiplier; // Учитываем множитель
+        scoreDisplay.textContent = 'Твои очки: ' + score;
+    });
+
+    upgradeButton.addEventListener('click', () => {
+        if (score >= upgradeCost) {
+            score -= upgradeCost;
+            clicksPerClick++;
+            upgradeCost = Math.floor(upgradeCost * 1.5);
+            updateDisplay();
+        } else {
+
+            alert('Недостаточно очков для улучшения!');
+        }
+    });
+
+    multiplierButton.addEventListener('click', () => {
+        if (score >= multiplierCost) {
+            score -= multiplierCost;
+            multiplier++;
+            multiplierCost = Math.floor(multiplierCost * 1.5);
+            updateMultiplierDisplay();
+            updateDisplay();
+        } else {
+            alert('Недостаточно очков для покупки множителя!');
+        }
+    });
+
+    rebirthButton.addEventListener('click', () => {
+        if (score >= rebirthCost) {
+            let gainedGems = Math.floor(rebirths * 5);
+            let gainedMultiplier = Math.floor(rebirths / 2) + 1;
+            
+            gems += gainedGems;
+            multiplier += gainedMultiplier;
+            
+            score -= rebirthCost; 
+            clicksPerClick = 1;
+            rebirths++;
+            rebirthCost = Math.floor(rebirthCost * 1.2); 
+            
+            updateDisplay();
+            updateMultiplierDisplay();
+            updateGemsDisplay();
+            rebirthInfo.textContent = 'Перерождения: ' + rebirths;
+        } else {
+            alert('Недостаточно кликов для перерождения!');
+        }
+    });
+
+    function updateDisplay() {
+        scoreDisplay.textContent = 'Твои очки: ' + score;
+        upgradeInfo.textContent = 'Цена улучшения: ' + upgradeCost;
+        rebirthCostInfo.textContent = 'Цена перерождения: ' + rebirthCost + ' кликов';
+    }
+
+    function updateMultiplierDisplay() {
+        multiplierInfo.textContent = 'Цена множителя: ' + multiplierCost + ', Множитель: ' + multiplier;
+    }
+
+    function updateGemsDisplay() {
+        gemsDisplay.textContent = 'Гемы: ' + gems;
+    }
+
+    // Функция для выдачи наград
+    function checkRewards() {
+        for (let i = 0; i < timeRewards.length; i++) {
+            if (timeSpent >= timeRewards[i].time) {
+                score += timeRewards[i].reward;
+                rewardInfo.textContent = `Вы получили ${timeRewards[i].reward} кликов за ${timeRewards[i].time / 60} минут!`;
+                timeRewards.splice(i, 1); // Удаляем награду после ее выдачи
+                break; // Выход из цикла
+            }
+        }
+    }
+
+    // Установка интервала для отслеживания времени
+    setInterval(() => {
+        timeSpent += 1; // Увеличиваем время на 1 секунду
+        checkRewards();
+    }, 1000); // Проверяем каждую секунду
+
+</script>
+
+</body>
+</html>
